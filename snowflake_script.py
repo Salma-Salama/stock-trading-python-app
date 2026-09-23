@@ -58,10 +58,9 @@ def fetch_stock_data(url):
     return full_data
 
 
-def add_ingestedat_column(full_data):
-    run_timestamp = datetime.now(ZoneInfo("Africa/Cairo"))
+def add_ingestedat_column(full_data, pipeline_start_time):
     for row in full_data:
-        row['ingested_at'] = run_timestamp
+        row['ingested_at'] = pipeline_start_time
     return full_data
 
 def insert_data_into_snowflake(full_data):
@@ -140,13 +139,15 @@ if __name__ == "__main__":
 
     print("Starting API - Snowflake pipeline...")
 
+    pipeline_start_time = datetime.now(ZoneInfo("Africa/Cairo"))
+
     full_data = fetch_stock_data(url)
     print(
         f"API extraction finished. "
         f"Total rows: {len(full_data)}"
     )
     if full_data:
-        full_data = add_ingestedat_column(full_data)
+        full_data = add_ingestedat_column(full_data, pipeline_start_time)
         print(
                "Ingestion timestamp:",
                full_data[0]["ingested_at"]
